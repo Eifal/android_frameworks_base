@@ -10835,6 +10835,8 @@ public class AudioService extends IAudioService.Stub
             permissionOverridesCheck = true;
         } else if (uid < UserHandle.AID_APP_START) {
             permissionOverridesCheck = true;
+        } else if (sdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            permissionOverridesCheck = true;
         }
 
         final long token = Binder.clearCallingIdentity();
@@ -11398,7 +11400,7 @@ public class AudioService extends IAudioService.Stub
 
     private AudioDeviceAttributes anonymizeAudioDeviceAttributesUnchecked(
             AudioDeviceAttributes ada) {
-        if (!AudioSystem.isBluetoothDevice(ada.getInternalType())) {
+        if (ada == null || !AudioSystem.isBluetoothDevice(ada.getInternalType())) {
             return ada;
         }
         AudioDeviceAttributes res = new AudioDeviceAttributes(ada);

@@ -5078,7 +5078,7 @@ public final class ActivityThread extends ClientTransactionHandler
         Service s = mServices.get(data.token);
         if (DEBUG_SERVICE)
             Slog.v(TAG, "handleBindService s=" + s + " rebind=" + data.rebind);
-        if (s != null) {
+        if (s != null && createData != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
                 data.intent.prepareToEnterProcess(isProtectedComponent(createData.info),
@@ -5109,7 +5109,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void handleUnbindService(BindServiceData data) {
         CreateServiceData createData = mServicesData.get(data.token);
         Service s = mServices.get(data.token);
-        if (s != null) {
+        if (s != null && createData != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
                 data.intent.prepareToEnterProcess(isProtectedComponent(createData.info),
@@ -5216,7 +5216,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void handleServiceArgs(ServiceArgsData data) {
         CreateServiceData createData = mServicesData.get(data.token);
         Service s = mServices.get(data.token);
-        if (s != null) {
+        if (s != null && createData != null) {
             try {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
@@ -6269,7 +6269,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.mPreserveWindow = tmp.mPreserveWindow;
+        r.mPreserveWindow = r.activity.mWindowAdded && tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
 
@@ -6487,7 +6487,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
         final Configuration currentResConfig = activity.getResources().getConfiguration();
-        final int diff = currentResConfig.diffPublicOnly(newConfig);
+        final int diff = currentResConfig != null ? currentResConfig.diffPublicOnly(newConfig) : 0xffffffff;
         final boolean hasPublicResConfigChange = diff != 0;
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
